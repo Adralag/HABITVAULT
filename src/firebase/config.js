@@ -5,15 +5,15 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 
-// Firebase configuration
+// Firebase configuration using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyAyMklpvR11-2nCSWoTopOPs6N38oBr6GY",
-  authDomain: "habitvault-f430f.firebaseapp.com",
-  projectId: "habitvault-f430f",
-  storageBucket: "habitvault-f430f.firebasestorage.app",
-  messagingSenderId: "176674261799",
-  appId: "1:176674261799:web:e9544fa4d0e148e48eb702",
-  measurementId: "G-9WPY1GL1BV"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
