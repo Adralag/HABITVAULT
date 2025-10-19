@@ -2,8 +2,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { ThemeProvider } from './context/ThemeContext'           
 import { useAuth } from './firebase/AuthContext'
 import { UserProvider } from './context/UserContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RouteTransition from './components/layout/RouteTransition'
+import { OnlineStatusProvider, useOnlineStatus } from './context/OnlineStatusContext'
+import OfflineFallback from './components/OfflineFallback'
+import OfflineWrapper from './components/OfflineWrapper'
+import PWAInstallPrompt from './components/pwa/PWAInstallPrompt'
+import PWAStatus from './components/pwa/PWAStatus'
 
 // Public Pages
 import LandingPage from './pages/LandingPage'
@@ -67,17 +72,23 @@ const RequireAuth = ({ children, fallback = "/login" }) => {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <UserProvider>
-          <RouteTransition>
-            <Routes>
-              {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/forgot-password" element={<Navigate to="/login" />} />
-          <Route path="/terms" element={<Navigate to="/" />} />
-          <Route path="/privacy" element={<Navigate to="/" />} />
+      <OnlineStatusProvider>
+        <Router>
+          <UserProvider>
+            <RouteTransition>
+              <OfflineWrapper>
+                {/* PWA Components */}
+                <PWAInstallPrompt />
+                <PWAStatus />
+                
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/forgot-password" element={<Navigate to="/login" />} />
+                  <Route path="/terms" element={<Navigate to="/" />} />
+                  <Route path="/privacy" element={<Navigate to="/" />} />
           
           {/* Onboarding Route */}
           <Route path="/onboarding" element={
@@ -149,10 +160,12 @@ function App() {
               <Navigate to="/dashboard" replace />
             </RequireAuth>
           } />
-            </Routes>
-          </RouteTransition>
-        </UserProvider>
-      </Router>
+                </Routes>
+              </OfflineWrapper>
+            </RouteTransition>
+          </UserProvider>
+        </Router>
+      </OnlineStatusProvider>
     </ThemeProvider>
   )
 }
