@@ -324,7 +324,7 @@ const DashboardLayout = ({ children }) => {
                 <div className="relative">
                   <Link to="/settings" className="flex items-center hover:opacity-80 transition-opacity">
                     <img
-                      src={getProfilePictureURL(currentUser?.photoURL, getDisplayName())}
+                      src={getProfilePictureURL(currentUser?.photoURL, getDisplayName(), currentUser?.uid)}
                       alt={getDisplayName()}
                       className="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                     />

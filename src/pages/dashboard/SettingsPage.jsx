@@ -335,7 +335,7 @@ const SettingsPage = () => {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <img
-                    src={getProfilePictureURL(currentUser?.photoURL, currentUser?.displayName || currentUser?.email)}
+                    src={getProfilePictureURL(currentUser?.photoURL, currentUser?.displayName || currentUser?.email, currentUser?.uid)}
                     alt="Profile"
                     className="h-20 w-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                   />

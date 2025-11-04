@@ -76,24 +76,42 @@ const PWAInstallPrompt = ({ open = true, onClose = () => {} }) => {
     }
 
     const promptToUse = deferredPrompt || (typeof window !== 'undefined' && window.__HABITVAULT_deferredPrompt) || null;
+    
     if (!promptToUse) {
-      // show fallback
-      setVisible(true);
+      // Show manual installation instructions
+      console.log('⚠️ PWA: beforeinstallprompt not available. Showing manual instructions.');
+      alert(
+        '📱 Install HabitVault:\n\n' +
+        '🌐 Chrome/Edge (Desktop):\n' +
+        '1. Click the install icon (⊕) in the address bar\n' +
+        '2. Or click menu (⋮) → Install HabitVault\n\n' +
+        '📱 Chrome/Edge (Mobile):\n' +
+        '1. Tap menu (⋮)\n' +
+        '2. Tap "Install app" or "Add to Home screen"\n\n' +
+        '🍎 Safari (iOS):\n' +
+        '1. Tap Share button (□↑)\n' +
+        '2. Tap "Add to Home Screen"\n' +
+        '3. Tap "Add"'
+      );
       return;
     }
 
     try {
+      console.log('🚀 PWA: Showing install prompt...');
       promptToUse.prompt();
       const choice = await promptToUse.userChoice;
+      
       if (choice.outcome === 'accepted') {
-        console.log('User accepted install');
+        console.log('✅ PWA: User accepted install');
       } else {
-        console.log('User dismissed install');
+        console.log('❌ PWA: User dismissed install');
       }
+      
       setDeferredPrompt(null);
       try { if (typeof window !== 'undefined') window.__HABITVAULT_deferredPrompt = null; } catch (e) { }
     } catch (err) {
-      console.warn('install prompt failed', err);
+      console.error('❌ PWA: Install prompt failed:', err);
+      alert('Unable to install. Please use your browser\'s install option from the menu.');
     }
 
     setVisible(false);

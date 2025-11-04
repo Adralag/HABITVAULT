@@ -8,16 +8,18 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+      injectRegister: 'auto',
       devOptions: {
-        enabled: true
+        enabled: true,
+        type: 'module'
       },
       manifest: {
         name: 'HabitVault - Secure Habit Tracking',
         short_name: 'HabitVault',
         description: 'A secure and private way to track your habits and achieve your goals',
-        theme_color: '#1E40AF',
-        background_color: '#F8FAFC',
+        theme_color: '#8b5cf6',
+        background_color: '#0f172a',
         display: 'standalone',
         scope: '/',
         start_url: '/',
@@ -28,20 +30,25 @@ export default defineConfig({
             src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
           },
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ],
-        screenshots: [
+            purpose: 'any'
+          },
           {
-            src: '/screenshot1.png',
-            sizes: '750x1334',
-            type: 'image/png'
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },
