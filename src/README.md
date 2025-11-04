@@ -2,7 +2,7 @@
 <div align="center">
   <img src="./assets/logo.png" alt="HabitVault Logo" width="120" height="120" />
   
-  # 🎯 HabitVault
+  # HabitVault
   
   ### Build Better Habits, Track Your Progress, Achieve Your Goals
   
