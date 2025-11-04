@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="./public/pwa-512x512.png.png" alt="HabitVault Logo" width="120" height="120" />
+  <img src="./public/pwa-512x512.png" alt="HabitVault Logo" width="120" height="120" />
   
   # 🎯 HabitVault
   
