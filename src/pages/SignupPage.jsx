@@ -95,7 +95,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/95 to-primary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-primary/95 to-primary flex flex-col justify-center py-4 sm:px-6 lg:px-8">
       <motion.div 
         className="sm:mx-auto sm:w-full sm:max-w-md"
         initial={{ opacity: 0, y: -20 }}
@@ -107,11 +107,11 @@ const SignupPage = () => {
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <Logo size="xl" />
-          <h2 className="text-white font-poppins font-bold text-3xl mt-2">HabitVault</h2>
+          <Logo size="lg" />
+          <h2 className="text-white font-poppins font-bold text-2xl mt-1">HabitVault</h2>
         </motion.div>
         <motion.h2 
-          className="mt-6 text-center text-3xl font-extrabold text-white font-poppins"
+          className="mt-3 text-center text-2xl font-extrabold text-white font-poppins"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
@@ -119,7 +119,7 @@ const SignupPage = () => {
           Create your account
         </motion.h2>
         <motion.p 
-          className="mt-2 text-center text-sm text-gray-300 font-inter"
+          className="mt-1 text-center text-sm text-gray-300 font-inter"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.6 }}
@@ -132,13 +132,13 @@ const SignupPage = () => {
       </motion.div>
 
       <motion.div 
-        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
+        className="mt-4 sm:mx-auto sm:w-full sm:max-w-md"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.3 }}
       >
         <motion.div 
-          className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10"
+          className="bg-white py-5 px-4 shadow-xl rounded-lg sm:px-10"
           whileHover={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
           transition={{ duration: 0.3 }}
         >
@@ -156,7 +156,7 @@ const SignupPage = () => {
               </div>
             </div>
           )}
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 font-inter">
                 Email address
@@ -175,7 +175,7 @@ const SignupPage = () => {
                   } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm`}
                 />
                 {errors.email && (
-                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                 )}
               </div>
             </div>
@@ -215,7 +215,7 @@ const SignupPage = () => {
                   )}
                 </button>
                 {errors.password && (
-                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                 )}
               </div>
               {!errors.password && (
@@ -258,7 +258,7 @@ const SignupPage = () => {
                   )}
                 </button>
                 {errors.confirmPassword && (
-                  <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                 )}
               </div>
             </div>
@@ -284,7 +284,7 @@ const SignupPage = () => {
               </label>
             </div>
             {errors.acceptTerms && (
-              <p className="mt-2 text-sm text-red-600">{errors.acceptTerms}</p>
+              <p className="mt-1 text-sm text-red-600">{errors.acceptTerms}</p>
             )}
 
             <motion.div
@@ -313,7 +313,7 @@ const SignupPage = () => {
 
           {/* Privacy focused message instead of third-party logins */}
           <motion.div 
-            className="mt-6 pt-3 border-t border-gray-300"
+            className="mt-3 pt-2 border-t border-gray-300"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
@@ -324,9 +324,9 @@ const SignupPage = () => {
               </svg>
               <span>Your data stays private with end-to-end encryption</span>
             </div>
-            <p className="mt-2 text-xs text-center text-gray-500">
+            <p className="mt-1 text-xs text-center text-gray-500">
               HabitVault never stores your habit data in plain text.
-              <br />All information is encrypted on your device.
+              All information is encrypted on your device.
             </p>
           </motion.div>
         </motion.div>
@@ -334,7 +334,7 @@ const SignupPage = () => {
 
       {/* Back to home link */}
       <motion.div 
-        className="mt-8 text-center"
+        className="mt-3 text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}

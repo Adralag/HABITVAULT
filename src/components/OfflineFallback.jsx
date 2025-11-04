@@ -7,26 +7,26 @@ import Logo from './ui/Logo';
  */
 const OfflineFallback = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-primary flex flex-col items-center justify-center px-4 py-12">
       <div className="mb-8">
         <Logo size="lg" />
       </div>
       
       <div className="text-center max-w-lg">
-        <h1 className="text-3xl font-bold text-primary mb-4 font-poppins">
+        <h1 className="text-3xl font-bold text-white mb-4 font-poppins">
           You're Offline
         </h1>
         
-        <p className="text-gray-600 mb-6 font-inter">
+        <p className="text-white mb-6 font-inter">
           It seems you're not connected to the internet. Some features of HabitVault require an active connection.
         </p>
         
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-semibold text-primary mb-3 font-poppins">
+        <div className="bg-primary p-6 rounded-lg shadow-md mb-6">
+          <h2 className="text-xl font-semibold text-white mb-3 font-poppins">
             What you can do:
           </h2>
           
-          <ul className="text-left text-gray-600 space-y-3">
+          <ul className="text-left text-white-600 space-y-3">
             <li className="flex items-start">
               <span className="text-secondary mr-2">•</span> 
               <span>Check your internet connection and try again</span>

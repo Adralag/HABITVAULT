@@ -4,6 +4,7 @@ import Card from '../../components/ui/dashboard/Card';
 import Button from '../../components/ui/Button';
 import { useReminders } from '../../hooks/useReminders';
 import { useHabits } from '../../hooks/useHabits';
+import { useReminderNotifications } from '../../hooks/useReminderNotifications';
 import { LoadingSpinner, ErrorMessage } from '../../components/ui';
 import ReminderForm from '../../components/ui/notifications/ReminderForm';
 
@@ -25,6 +26,15 @@ const NotificationsPage = () => {
   
   // Get habits for the form dropdown
   const { habits, loading: loadingHabits } = useHabits();
+  
+  // Get notification permission state
+  const { 
+    isSupported, 
+    notificationPermission, 
+    requestPermission, 
+    sendTestNotification,
+    hasPermission 
+  } = useReminderNotifications();
   
   const handleToggleActive = async (id) => {
     try {
@@ -123,6 +133,74 @@ const NotificationsPage = () => {
           {showAddForm ? 'Cancel' : 'Add Reminder'}
         </Button>
       </div>
+
+      {/* Notification Permission Banner */}
+      {isSupported && !hasPermission && (
+        <div className="mb-6 bg-gradient-to-r from-accent/10 to-secondary/10 border-l-4 border-accent rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                Enable Browser Notifications
+              </h3>
+              <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                <p>Get notified at the right time to stay on track with your habits. We'll send you reminders based on your schedule.</p>
+              </div>
+              <div className="mt-4 flex space-x-3">
+                <Button 
+                  onClick={requestPermission}
+                  size="sm"
+                >
+                  Enable Notifications
+                </Button>
+                {hasPermission && (
+                  <Button 
+                    onClick={sendTestNotification}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Test Notification
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Permission Granted Banner */}
+      {hasPermission && (
+        <div className="mb-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-green-800 dark:text-green-200">
+                Notifications Enabled
+              </h3>
+              <div className="mt-1 text-sm text-green-700 dark:text-green-300">
+                <p>You'll receive reminders at your scheduled times. {activeReminders.length} reminder{activeReminders.length !== 1 ? 's' : ''} active.</p>
+              </div>
+              <div className="mt-3">
+                <Button 
+                  onClick={sendTestNotification}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Send Test Notification
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Loading and Error States */}
       {loading && (
