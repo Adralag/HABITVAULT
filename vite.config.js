@@ -9,16 +9,20 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      devOptions: {
+        enabled: true
+      },
       manifest: {
-        name: 'HabitVault',
+        name: 'HabitVault - Secure Habit Tracking',
         short_name: 'HabitVault',
-        description: 'Secure habit tracking with end-to-end encryption',
-        theme_color: '#1E40AF', // primary color from your theme
+        description: 'A secure and private way to track your habits and achieve your goals',
+        theme_color: '#1E40AF',
         background_color: '#F8FAFC',
         display: 'standalone',
         scope: '/',
         start_url: '/',
-        orientation: 'portrait',
+        orientation: 'portrait-primary',
+        categories: ['productivity', 'health', 'lifestyle'],
         icons: [
           {
             src: '/pwa-192x192.png',

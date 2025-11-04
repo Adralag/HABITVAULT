@@ -1,148 +1,174 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 
-/**
- * PWA Install Prompt Component
- * Shows a button to install the PWA when it's available for installation
- * Provides instructions for iOS users who cannot install via prompt
- */
-const PWAInstallPrompt = () => {
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isIOSDevice, setIsIOSDevice] = useState(false);
-  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
-  
-  // Listen for the beforeinstallprompt event
+// Minimal inline icons to avoid adding lucide-react dependency
+const IconDownload = ({ className = 'w-4 h-4' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m0 0l-4-4m4 4l4-4M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6" />
+  </svg>
+);
+const IconX = ({ className = 'w-5 h-5' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+const IconSparkles = ({ className = 'w-3 h-3' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 20 20" fill="currentColor">
+    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l.356 1.09a1 1 0 00.95.69h1.146c.969 0 1.371 1.24.588 1.81l-.927.67a1 1 0 00-.364 1.118l.356 1.09c.3.921-.755 1.688-1.538 1.118l-.927-.67a1 1 0 00-1.176 0l-.927.67c-.783.57-1.838-.197-1.538-1.118l.356-1.09a1 1 0 00-.364-1.118l-.927-.67c-.783-.57-.38-1.81.588-1.81h1.146a1 1 0 00.95-.69l.356-1.09z" />
+  </svg>
+);
+const IconHeart = ({ className = 'w-3 h-3' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21s-7-4.35-9-7.14C1.64 11.6 3.28 7 7.5 7c2.04 0 3.15 1.1 4.5 2.6C12.85 8.1 13.96 7 16 7 20.22 7 21.86 11.6 21 13.86 19 16.65 12 21 12 21z" />
+  </svg>
+);
+
+const PWAInstallPrompt = ({ open = true, onClose = () => {} }) => {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [visible, setVisible] = useState(open);
+  const [animeImages, setAnimeImages] = useState([]);
+
   useEffect(() => {
-    // Check if it's an iOS device
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOSDevice(isIOS);
-    
-    const handleBeforeInstallPrompt = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
+    setVisible(open);
+  }, [open]);
+
+  useEffect(() => {
+    const handler = (e) => {
       e.preventDefault();
-      // Stash the event so it can be triggered later
-      setInstallPrompt(e);
-    };
-    
-    // Check if app is already installed
-    const checkIfInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches || 
-          window.navigator.standalone === true) {
-        setIsInstalled(true);
+      // Save event locally and globally
+      try {
+        if (typeof window !== 'undefined') window.__HABITVAULT_deferredPrompt = e;
+      } catch (err) {
+        // ignore
       }
+      setDeferredPrompt(e);
+      setVisible(true);
     };
-    
-    // Add event listeners
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', () => setIsInstalled(true));
-    
-    // Check if already installed
-    checkIfInstalled();
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', () => setIsInstalled(true));
-    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // If a global deferred prompt was already captured (src/pwa.js), use it
+    try {
+      if (typeof window !== 'undefined' && window.__HABITVAULT_deferredPrompt) {
+        setDeferredPrompt(window.__HABITVAULT_deferredPrompt);
+        setVisible(true);
+      }
+    } catch (err) {
+      // ignore
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
-  
-  // Handle install button click
+
+  // Try to load a few images from the project's assets folder as background (fallback to logo if missing)
+  useEffect(() => {
+    const assets = [
+      '/src/assets/logo-no-bg.png',
+    ];
+    setAnimeImages(assets.slice(0, 3));
+  }, []);
+
   const handleInstallClick = async () => {
-    // For iOS devices, show the instructions
-    if (isIOSDevice) {
-      setShowIOSInstructions(!showIOSInstructions);
+    // Respect session dismiss
+    if (sessionStorage.getItem('pwa-install-dismissed')) {
+      setVisible(false);
+      onClose();
       return;
     }
-    
-    // For other devices, use the install prompt
-    if (!installPrompt) return;
-    
-    // Show the install prompt
-    installPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const choiceResult = await installPrompt.userChoice;
-    
-    // Reset the install prompt variable
-    setInstallPrompt(null);
-    
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
+
+    const promptToUse = deferredPrompt || (typeof window !== 'undefined' && window.__HABITVAULT_deferredPrompt) || null;
+    if (!promptToUse) {
+      // show fallback
+      setVisible(true);
+      return;
     }
+
+    try {
+      promptToUse.prompt();
+      const choice = await promptToUse.userChoice;
+      if (choice.outcome === 'accepted') {
+        console.log('User accepted install');
+      } else {
+        console.log('User dismissed install');
+      }
+      setDeferredPrompt(null);
+      try { if (typeof window !== 'undefined') window.__HABITVAULT_deferredPrompt = null; } catch (e) { }
+    } catch (err) {
+      console.warn('install prompt failed', err);
+    }
+
+    setVisible(false);
+    onClose();
   };
-  
-  // Return null if the app is already installed
-  if (isInstalled) return null;
-  
-  // Show iOS instructions or standard install button
-  const shouldShowInstallOption = installPrompt || isIOSDevice;
-  
-  if (!shouldShowInstallOption) return null;
+
+  const handleDismiss = () => {
+    sessionStorage.setItem('pwa-install-dismissed', 'true');
+    setVisible(false);
+    onClose();
+  };
+
+  if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 md:left-auto md:bottom-8 md:right-8">
-      <motion.div 
-        className="flex flex-col"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <button
-          onClick={handleInstallClick}
-          className="flex items-center bg-primary text-white px-4 py-2 rounded-lg shadow-lg transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 mr-2" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" 
-            />
-          </svg>
-          {isIOSDevice ? "Install on iOS" : "Install App"}
-        </button>
-        
-        {/* iOS Instructions */}
-        {isIOSDevice && showIOSInstructions && (
-          <motion.div 
-            className="mt-2 bg-white rounded-lg shadow-lg p-4 max-w-xs md:max-w-sm text-sm"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            transition={{ duration: 0.3 }}
-          >
-            <h3 className="font-bold text-primary mb-2">Install HabitVault on iOS</h3>
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>Tap the <strong>Share</strong> button <span className="inline-block w-5 h-5 bg-gray-200 rounded-md text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-full h-full p-1">
-                  <path d="M13 4.5a2.5 2.5 0 11.5 0 2.5 2.5 0 01-5 0zm-8 0a2.5 2.5 0 11.5 0 2.5 2.5 0 01-5 0zm0 11a2.5 2.5 0 11.5 0 2.5 2.5 0 01-5 0zm8 0a2.5 2.5 0 11.5 0 2.5 2.5 0 01-5 0z" />
-                </svg>
-              </span> at the bottom of your browser.</li>
-              <li>Scroll down and tap <strong>Add to Home Screen</strong> <span className="inline-block w-5 h-5 bg-gray-200 rounded-md text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-full h-full p-1">
-                  <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                </svg>
-              </span>.</li>
-              <li>Tap <strong>Add</strong> in the top-right corner.</li>
-              <li>HabitVault will be added to your home screen.</li>
-            </ol>
-            <button 
-              className="mt-3 text-xs text-primary font-medium"
-              onClick={() => setShowIOSInstructions(false)}
-            >
-              Hide Instructions
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-slide-up">
+      <div className="relative bg-black border border-slate-700/30 rounded-2xl shadow-lg overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="flex h-full">
+            {animeImages.map((image, i) => (
+              <div key={i} className="flex-1 h-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
+            ))}
+          </div>
+        </div>
+
+        <div className="relative p-5">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="relative w-12 h-12 bg-white rounded-xl overflow-hidden">
+                <img src="/src/assets/logo.png" alt="logo" className="w-full h-full object-cover" />
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full flex items-center justify-center">
+                  <IconSparkles className="w-3 h-3 text-white" />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-white text-lg">HabitVault</h3>
+                <p className="text-sm text-slate-300">Install App</p>
+              </div>
+            </div>
+
+            <button onClick={handleDismiss} className="text-slate-300 hover:text-white p-1 rounded-lg">
+              <IconX />
             </button>
-          </motion.div>
-        )}
-      </motion.div>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-slate-300 text-sm mb-2">✨ Use HabitVault offline and get faster access.</p>
+            <div className="flex items-center space-x-4 text-xs text-slate-300">
+              <div className="flex items-center space-x-1">
+                <IconHeart />
+                <span>Offline reading</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <IconDownload />
+                <span>Faster access</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-3">
+            <button onClick={handleInstallClick} className="flex-1 bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-bold py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2">
+              <IconDownload className="w-4 h-4" />
+              <span>Install Now</span>
+            </button>
+            <button onClick={handleDismiss} className="px-4 py-3 text-slate-300 hover:text-white transition-colors border border-slate-700 rounded-xl">
+              Later
+            </button>
+          </div>
+
+          <div className="mt-4 flex justify-center">
+            <div className="h-1 w-16 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-400 rounded-full opacity-60"></div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -19,6 +19,7 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -82,16 +83,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/95 to-primary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-primary/95 to-primary flex flex-col justify-center py-6 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex flex-col items-center">
-          <Logo size="xl" />
-          <h2 className="text-white font-poppins font-bold text-3xl mt-2">HabitVault</h2>
+          <Logo size="lg" />
+          <h2 className="text-white font-poppins font-bold text-2xl mt-1">HabitVault</h2>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-white font-poppins">
+        <h2 className="mt-4 text-center text-2xl font-extrabold text-white font-poppins">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-300 font-inter">
+        <p className="mt-1 text-center text-sm text-gray-300 font-inter">
           Or{' '}
           <Link to="/signup" className="font-medium text-accent hover:text-secondary">
             create a new account
@@ -99,8 +100,8 @@ const LoginPage = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-6 px-4 shadow-xl rounded-lg sm:px-10">
           {loginError && (
             <div className="rounded-md bg-red-50 p-4 mb-4">
               <div className="flex">
@@ -115,7 +116,7 @@ const LoginPage = () => {
               </div>
             </div>
           )}
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 font-inter">
                 Email address
@@ -134,7 +135,7 @@ const LoginPage = () => {
                   } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm`}
                 />
                 {errors.email && (
-                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                 )}
               </div>
             </div>
@@ -143,11 +144,11 @@ const LoginPage = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 font-inter">
                 Password
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={formData.password}
@@ -156,8 +157,25 @@ const LoginPage = () => {
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-accent"
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
                 {errors.password && (
-                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                 )}
               </div>
             </div>
@@ -179,7 +197,7 @@ const LoginPage = () => {
 
               <div className="text-sm">
                 <Link to="/forgot-password" className="font-medium text-accent hover:text-secondary">
-                  Forgot your password?
+                  Forgot password?
                 </Link>
               </div>
             </div>
@@ -198,7 +216,7 @@ const LoginPage = () => {
           </form>
 
           {/* Security message instead of third-party logins */}
-          <div className="mt-6 pt-3 border-t border-gray-300">
+          <div className="mt-4 pt-3 border-t border-gray-300">
             <div className="flex items-center justify-center text-sm text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-accent" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
@@ -210,7 +228,7 @@ const LoginPage = () => {
       </div>
 
       {/* Back to home link */}
-      <div className="mt-8 text-center">
+      <div className="mt-4 text-center">
         <Link to="/" className="text-sm text-gray-300 hover:text-white font-inter">
           ← Back to home
         </Link>

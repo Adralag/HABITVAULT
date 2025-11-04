@@ -7,13 +7,12 @@ import RouteTransition from './components/layout/RouteTransition'
 import { OnlineStatusProvider, useOnlineStatus } from './context/OnlineStatusContext'
 import OfflineFallback from './components/OfflineFallback'
 import OfflineWrapper from './components/OfflineWrapper'
-import PWAInstallPrompt from './components/pwa/PWAInstallPrompt'
-import PWAStatus from './components/pwa/PWAStatus'
 
 // Public Pages
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import OnboardingPage from './pages/OnboardingPage'
 
 // Guards
@@ -77,16 +76,12 @@ function App() {
           <UserProvider>
             <RouteTransition>
               <OfflineWrapper>
-                {/* PWA Components */}
-                <PWAInstallPrompt />
-                <PWAStatus />
-                
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
-                  <Route path="/forgot-password" element={<Navigate to="/login" />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/terms" element={<Navigate to="/" />} />
                   <Route path="/privacy" element={<Navigate to="/" />} />
           

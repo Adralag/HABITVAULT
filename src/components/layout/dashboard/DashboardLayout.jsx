@@ -4,7 +4,9 @@ import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../firebase/AuthContext';
 import { useUser } from '../../../context/UserContext';
 import { NotificationDropdown } from '../../ui/notifications';
+import { getProfilePictureURL } from '../../../firebase/storageServices';
 import Logo from '../../ui/Logo';
+import PWAInstallPrompt from '../../pwa/PWAInstallPrompt';
 
 // Icons for the sidebar
 const DashboardIcon = () => (
@@ -41,6 +43,12 @@ const SettingsIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
   </svg>
 );
 
@@ -82,15 +90,17 @@ const navItems = [
   { name: 'Goals & Streaks', icon: <GoalsIcon />, path: '/goals' },
   { name: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
   { name: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+  { name: 'Download App', icon: <DownloadIcon />, path: '#download-app', isAction: true },
 ];
 
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
-  const { userData, loading: userLoading } = useUser();
+  const { userData } = useUser();
   
   const handleLogout = async () => {
     try {
@@ -99,6 +109,15 @@ const DashboardLayout = ({ children }) => {
     } catch (error) {
       console.error('Failed to logout', error);
     }
+  };
+  
+  const handleInstallAction = () => {
+    setShowInstallPrompt(true);
+  };
+
+  const handleCloseInstallPrompt = () => {
+    console.debug('DashboardLayout: handleCloseInstallPrompt called - hiding prompt');
+    setShowInstallPrompt(false);
   };
   
   // Get display name from user profile or fallback to Firebase displayName or email
@@ -134,18 +153,29 @@ const DashboardLayout = ({ children }) => {
         <div className="flex flex-col flex-grow p-4">
           <nav className="flex-1 space-y-1">
             {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors duration-150 ${
-                  location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
-                    ? 'bg-accent text-white'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.name}
-              </Link>
+              item.isAction ? (
+                <button
+                  key={item.name}
+                  onClick={handleInstallAction}
+                  className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors duration-150 ${
+                    location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+                      ? 'bg-accent text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.name}
+                </Link>
+              )
             ))}
           </nav>
           <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -203,19 +233,33 @@ const DashboardLayout = ({ children }) => {
             <div className="flex-1 h-0 overflow-y-auto">
               <nav className="p-4 space-y-1">
                 {navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors duration-150 ${
-                      location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
-                        ? 'bg-accent text-white'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <span className="mr-3">{item.icon}</span>
-                    {item.name}
-                  </Link>
+                  item.isAction ? (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        handleInstallAction();
+                        setSidebarOpen(false);
+                      }}
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.name}
+                    </button>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors duration-150 ${
+                        location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+                          ? 'bg-accent text-white'
+                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.name}
+                    </Link>
+                  )
                 ))}
               </nav>
               <div className="mt-auto p-4 border-t border-gray-200 dark:border-gray-700">
@@ -276,16 +320,18 @@ const DashboardLayout = ({ children }) => {
                 {/* Notification Dropdown */}
                 <NotificationDropdown />
                 
-                {/* User profile with data from Firestore */}
+                {/* User profile with profile picture */}
                 <div className="relative">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white font-medium">
-                      {getInitial()}
-                    </div>
+                  <Link to="/settings" className="flex items-center hover:opacity-80 transition-opacity">
+                    <img
+                      src={getProfilePictureURL(currentUser?.photoURL, getDisplayName())}
+                      alt={getDisplayName()}
+                      className="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                    />
                     <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
                       {getDisplayName()}
                     </span>
-                  </div>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -296,6 +342,9 @@ const DashboardLayout = ({ children }) => {
         <main className="flex-1 overflow-auto p-6 bg-gray-50 dark:bg-gray-900">
           {children}
         </main>
+        
+  {/* PWA Install Prompt */}
+  <PWAInstallPrompt open={showInstallPrompt} onClose={handleCloseInstallPrompt} />
       </div>
     </div>
   );

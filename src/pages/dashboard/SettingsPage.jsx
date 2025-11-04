@@ -4,6 +4,7 @@ import Card from '../../components/ui/dashboard/Card';
 import { useTheme } from '../../context/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
 import { useAuth } from '../../firebase/AuthContext';
+import { uploadAndUpdateProfilePicture, getProfilePictureURL, updateUserProfile } from '../../firebase/storageServices';
 import { LoadingSpinner, CardSkeleton, ErrorMessage } from '../../components/ui';
 
 // Toggle Switch Component
@@ -110,6 +111,9 @@ const SettingsPage = () => {
   const [showEncryptionKey, setShowEncryptionKey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [editingDisplayName, setEditingDisplayName] = useState(false);
+  const [displayNameValue, setDisplayNameValue] = useState('');
   const [localSettings, setLocalSettings] = useState({
     notifications: {
       enabled: true,
@@ -137,6 +141,56 @@ const SettingsPage = () => {
       });
     }
   }, [userSettings]);
+
+  // Initialize display name from current user
+  useEffect(() => {
+    if (currentUser?.displayName) {
+      setDisplayNameValue(currentUser.displayName);
+    }
+  }, [currentUser]);
+
+  // Handle profile picture upload
+  const handleProfilePictureUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    try {
+      await uploadAndUpdateProfilePicture(currentUser, file);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      // Force re-render by reloading user
+      window.location.reload();
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      alert(error.message || 'Failed to upload profile picture');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  // Handle display name update
+  const handleUpdateDisplayName = async () => {
+    if (!displayNameValue.trim()) {
+      alert('Display name cannot be empty');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateUserProfile(currentUser, null, displayNameValue);
+      setEditingDisplayName(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      // Force re-render by reloading user
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating display name:', error);
+      alert('Failed to update display name');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Update a specific setting section
   const updateSettingSection = (section, key, value) => {
@@ -236,13 +290,11 @@ const SettingsPage = () => {
   if (error) {
     return (
       <DashboardLayout>
-        <ErrorMessage
-          variant={error.variant}
-          title="Failed to load settings"
-          message={error.message}
-          onRetry={() => clearError()}
-          error={error.originalError}
-        />
+        <div className="p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-800 dark:text-red-200">Error loading settings: {error}</p>
+          </div>
+        </div>
       </DashboardLayout>
     );
   }
@@ -250,14 +302,10 @@ const SettingsPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto p-3 sm:p-4 md:p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white font-poppins">Settings</h2>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
-              Manage your account preferences and application settings
-            </p>
-          </div>
-          
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Settings</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">Manage your account and preferences</p>
+
           {/* Success message */}
           {saveSuccess && (
             <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-md text-sm">
@@ -275,6 +323,92 @@ const SettingsPage = () => {
               onChange={toggleTheme}
               description="Switch between light and dark themes"
             />
+          </div>
+        </Card>
+
+        {/* Profile Section */}
+        <Card title="Profile" subtitle="Manage your profile information">
+          <div className="space-y-4">
+            {/* Profile Picture */}
+            <div className="py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+              <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-3">Profile Picture</h4>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <img
+                    src={getProfilePictureURL(currentUser?.photoURL, currentUser?.displayName || currentUser?.email)}
+                    alt="Profile"
+                    className="h-20 w-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                  />
+                  {uploadingPhoto && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                      <LoadingSpinner size="sm" color="white" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="profile-picture-upload" className="cursor-pointer">
+                    <span className="px-3 py-1.5 bg-accent text-white rounded-md hover:bg-accent/90 text-sm font-medium inline-block">
+                      {currentUser?.photoURL ? 'Change Photo' : 'Upload Photo'}
+                    </span>
+                  </label>
+                  <input
+                    id="profile-picture-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePictureUpload}
+                    disabled={uploadingPhoto}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    JPG, PNG, GIF or WEBP. Max 5MB.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Display Name */}
+            <div className="py-3 sm:py-4">
+              <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">Display Name</h4>
+              {editingDisplayName ? (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={displayNameValue}
+                    onChange={(e) => setDisplayNameValue(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white text-sm"
+                    placeholder="Enter your display name"
+                  />
+                  <button
+                    onClick={handleUpdateDisplayName}
+                    disabled={isSaving}
+                    className="px-3 py-2 bg-accent text-white rounded-md hover:bg-accent/90 text-sm font-medium disabled:opacity-50"
+                  >
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingDisplayName(false);
+                      setDisplayNameValue(currentUser?.displayName || '');
+                    }}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {currentUser?.displayName || 'Not set'}
+                  </p>
+                  <button
+                    onClick={() => setEditingDisplayName(true)}
+                    className="text-sm text-accent hover:text-accent/80 font-medium"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </Card>
 

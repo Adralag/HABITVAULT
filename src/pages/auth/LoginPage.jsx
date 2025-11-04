@@ -32,9 +32,9 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/95 to-primary px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/95 to-primary px-4 py-8 overflow-y-auto">
       <motion.div 
-        className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl"
+        className="max-w-md w-full space-y-6 p-6 md:p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl my-auto"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -50,16 +50,16 @@ const LoginPage = () => {
               HabitVault
             </h1>
           </div>
-          <h2 className="mt-6 text-center text-2xl font-bold text-gray-900 dark:text-white font-poppins">
+          <h2 className="mt-4 text-center text-2xl font-bold text-gray-900 dark:text-white font-poppins">
             {isRegistering ? 'Create your account' : 'Welcome back'}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400 font-inter">
+          <p className="mt-1 text-center text-sm text-gray-600 dark:text-gray-400 font-inter">
             {isRegistering ? 'Join our secure habit tracking platform' : 'Sign in to continue your journey'}
           </p>
         </motion.div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
+        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm space-y-3">
             {isRegistering && (
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">

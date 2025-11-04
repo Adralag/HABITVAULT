@@ -315,7 +315,7 @@ const LandingPage = () => {
               </p>
               
               <motion.div 
-                className="bg-primary/5 p-4 rounded font-jetbrains text-sm mt-4"
+                className="bg-black p-4 rounded font-jetbrains text-sm mt-4"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.5 }}

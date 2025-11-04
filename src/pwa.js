@@ -87,3 +87,21 @@ function showOfflineReadyNotification() {
 }
 
 export { updateSW };
+
+// Save a reference to the deferred prompt globally so components that mount
+// after the event can still trigger the native prompt.
+if (typeof window !== 'undefined') {
+  window.__HABITVAULT_deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the default mini-infobar from appearing on mobile
+    e.preventDefault();
+    window.__HABITVAULT_deferredPrompt = e;
+    console.debug('pwa.js: saved deferredPrompt to window.__HABITVAULT_deferredPrompt');
+  });
+
+  window.addEventListener('appinstalled', () => {
+    window.__HABITVAULT_deferredPrompt = null;
+    console.debug('pwa.js: appinstalled - cleared deferredPrompt');
+  });
+}
