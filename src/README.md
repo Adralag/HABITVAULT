@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="/logo.png" alt="HabitVault Logo" width="120" height="120" />
+  <img src="./public/logo.png" alt="HabitVault Logo" width="120" height="120" />
   
   # 🎯 HabitVault
   
