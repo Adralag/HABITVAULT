@@ -1,12 +1,10 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
-import { storage } from './config';
 
 /**
- * Upload profile picture to Firebase Storage
+ * Upload profile picture to localStorage (Base64)
  * @param {string} userId - User ID
  * @param {File} file - Image file
- * @returns {Promise<string>} Download URL of uploaded image
+ * @returns {Promise<string>} Base64 data URL of uploaded image
  */
 export const uploadProfilePicture = async (userId, file) => {
   if (!userId) throw new Error('User ID is required');
@@ -18,26 +16,31 @@ export const uploadProfilePicture = async (userId, file) => {
     throw new Error('Invalid file type. Please upload a JPEG, PNG, WEBP, or GIF image.');
   }
 
-  // Validate file size (max 5MB)
-  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  // Validate file size (max 2MB for localStorage)
+  const maxSize = 2 * 1024 * 1024; // 2MB in bytes
   if (file.size > maxSize) {
-    throw new Error('File size exceeds 5MB. Please upload a smaller image.');
+    throw new Error('File size exceeds 2MB. Please upload a smaller image.');
   }
 
   try {
-    // Create a reference to the storage location
-    const fileExtension = file.name.split('.').pop();
-    const fileName = `profile-${Date.now()}.${fileExtension}`;
-    const storageRef = ref(storage, `users/${userId}/profile/${fileName}`);
-
-    // Upload the file
-    const snapshot = await uploadBytes(storageRef, file, {
-      contentType: file.type,
+    // Convert file to base64
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = () => {
+        const base64String = reader.result;
+        // Store in localStorage
+        localStorage.setItem(`profilePicture_${userId}`, base64String);
+        resolve(base64String);
+      };
+      
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        reject(new Error('Failed to read image file'));
+      };
+      
+      reader.readAsDataURL(file);
     });
-
-    // Get the download URL
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
   } catch (error) {
     console.error('Error uploading profile picture:', error);
     throw error;
@@ -45,23 +48,17 @@ export const uploadProfilePicture = async (userId, file) => {
 };
 
 /**
- * Delete profile picture from Firebase Storage
- * @param {string} photoURL - Photo URL to delete
+ * Delete profile picture from localStorage
+ * @param {string} userId - User ID
  * @returns {Promise<boolean>} Success status
  */
-export const deleteProfilePicture = async (photoURL) => {
-  if (!photoURL) return false;
+export const deleteProfilePicture = async (userId) => {
+  if (!userId) return false;
 
   try {
-    // Extract the file path from the URL
-    const fileRef = ref(storage, photoURL);
-    await deleteObject(fileRef);
+    localStorage.removeItem(`profilePicture_${userId}`);
     return true;
   } catch (error) {
-    // If file doesn't exist, that's okay
-    if (error.code === 'storage/object-not-found') {
-      return true;
-    }
     console.error('Error deleting profile picture:', error);
     throw error;
   }
@@ -69,11 +66,21 @@ export const deleteProfilePicture = async (photoURL) => {
 
 /**
  * Get profile picture URL or default avatar
- * @param {string} photoURL - User's photo URL
+ * @param {string} photoURL - User's photo URL from Firebase Auth
  * @param {string} displayName - User's display name for generating initials
+ * @param {string} userId - User ID to fetch from localStorage
  * @returns {string} Photo URL or data URI for default avatar
  */
-export const getProfilePictureURL = (photoURL, displayName) => {
+export const getProfilePictureURL = (photoURL, displayName, userId) => {
+  // Check localStorage first
+  if (userId) {
+    const storedPhoto = localStorage.getItem(`profilePicture_${userId}`);
+    if (storedPhoto) {
+      return storedPhoto;
+    }
+  }
+  
+  // Fallback to Firebase Auth photoURL
   if (photoURL) {
     return photoURL;
   }
@@ -105,7 +112,7 @@ export const getProfilePictureURL = (photoURL, displayName) => {
 /**
  * Update user profile with new photo URL and/or display name
  * @param {Object} user - Firebase auth user object
- * @param {string} photoURL - URL of the new photo
+ * @param {string} photoURL - URL of the new photo (can be base64 or URL)
  * @param {string} displayName - Optional display name to update
  * @returns {Promise<boolean>} Success status
  */

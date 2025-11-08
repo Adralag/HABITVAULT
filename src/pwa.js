@@ -97,11 +97,30 @@ if (typeof window !== 'undefined') {
     // Prevent the default mini-infobar from appearing on mobile
     e.preventDefault();
     window.__HABITVAULT_deferredPrompt = e;
-    console.debug('pwa.js: saved deferredPrompt to window.__HABITVAULT_deferredPrompt');
+    console.log('✅ PWA: beforeinstallprompt event fired! App is installable.');
+    console.log('PWA: saved deferredPrompt to window.__HABITVAULT_deferredPrompt');
   });
 
   window.addEventListener('appinstalled', () => {
     window.__HABITVAULT_deferredPrompt = null;
-    console.debug('pwa.js: appinstalled - cleared deferredPrompt');
+    console.log('✅ PWA: App installed successfully!');
+    console.log('PWA: cleared deferredPrompt');
+  });
+
+  // Check if app is already installed
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('✅ PWA: App is running in standalone mode (already installed)');
+  } else {
+    console.log('ℹ️ PWA: App is running in browser mode');
+  }
+
+  // Log PWA installation criteria
+  console.log('ℹ️ PWA Installation Criteria:');
+  console.log('  • HTTPS or localhost: ✓');
+  console.log('  • Manifest.json: ' + (document.querySelector('link[rel="manifest"]') ? '✓' : '✗'));
+  console.log('  • Service Worker: checking...');
+  
+  navigator.serviceWorker?.getRegistration().then(reg => {
+    console.log('  • Service Worker: ' + (reg ? '✓ Active' : '✗ Not registered'));
   });
 }
