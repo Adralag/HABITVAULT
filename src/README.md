@@ -563,7 +563,7 @@ users/
 
 ## 👥 Team Contributions
 
-This project was collaboratively built by **8 team members** as a group assignment. Below is the work division:
+This project was collaboratively built by **10 team members** as a group assignment. Below is the work division:
 
 ### 🧑‍💻 **Member 1: Project Lead & Authentication**
 **Adebowale Oluwasegun** (sadebowale092@gmail.com)
@@ -612,7 +612,7 @@ This project was collaboratively built by **8 team members** as a group assignme
 
 ---
 
-### 📋 **Member 3: Habits Management**
+### 📋 **Member 3 & 9: Habits Management**
 
 **Responsibilities:**
 - Habit CRUD operations
@@ -683,7 +683,7 @@ This project was collaboratively built by **8 team members** as a group assignme
 
 ---
 
-### 🔔 **Member 6: Notifications & Reminders**
+### 🔔 **Member 6 & 10: Notifications & Reminders**
 
 **Responsibilities:**
 - Notification system implementation
